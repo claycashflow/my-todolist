@@ -1128,12 +1128,12 @@ app.listen(PORT, () => {
 **담당자**: 백엔드 개발자
 
 #### 완료 조건 체크리스트
-- [ ] 단위 테스트 작성 및 통과 (DAO, Service)
-- [ ] 통합 테스트 작성 및 통과 (API Endpoints)
-- [ ] 모든 API 엔드포인트 manual 테스트 완료 (Postman)
-- [ ] 에러 처리 검증 완료 (모든 에러 한국어)
-- [ ] 성능 확인 (API 응답 < 200ms)
-- [ ] 로컬 환경 실행 테스트 완료
+- [x] 단위 테스트 작성 및 통과 (DAO, Service)
+- [x] 통합 테스트 작성 및 통과 (API Endpoints)
+- [x] 모든 API 엔드포인트 manual 테스트 완료 (Postman)
+- [x] 에러 처리 검증 완료 (모든 에러 한국어)
+- [x] 성능 확인 (API 응답 < 200ms)
+- [x] 로컬 환경 실행 테스트 완료
 
 #### 의존성
 - BE-8 완료 필수
@@ -1141,23 +1141,23 @@ app.listen(PORT, () => {
 #### 테스트 체크리스트
 ```
 [인증 API]
-- [ ] POST /api/auth/register - 정상 가입 (201)
-- [ ] POST /api/auth/register - 중복 아이디 (409)
-- [ ] POST /api/auth/register - 짧은 password (400)
-- [ ] POST /api/auth/login - 정상 로그인 (200)
-- [ ] POST /api/auth/login - 잘못된 정보 (401)
+- [x] POST /api/auth/register - 정상 가입 (201)
+- [x] POST /api/auth/register - 중복 아이디 (409)
+- [x] POST /api/auth/register - 짧은 password (400)
+- [x] POST /api/auth/login - 정상 로그인 (200)
+- [x] POST /api/auth/login - 잘못된 정보 (401)
 
 [할일 API]
-- [ ] GET /api/todos - 정상 조회 (200)
-- [ ] GET /api/todos - 미인증 (401)
-- [ ] GET /api/todos/:id - 정상 조회 (200)
-- [ ] GET /api/todos/:id - 없는 할일 (404)
-- [ ] POST /api/todos - 정상 생성 (201)
-- [ ] POST /api/todos - 필수값 누락 (400)
-- [ ] PUT /api/todos/:id - 정상 수정 (200)
-- [ ] PUT /api/todos/:id - 타인 할일 (403)
-- [ ] DELETE /api/todos/:id - 정상 삭제 (204)
-- [ ] DELETE /api/todos/:id - 타인 할일 (403)
+- [x] GET /api/todos - 정상 조회 (200)
+- [x] GET /api/todos - 미인증 (401)
+- [x] GET /api/todos/:id - 정상 조회 (200)
+- [x] GET /api/todos/:id - 없는 할일 (404)
+- [x] POST /api/todos - 정상 생성 (201)
+- [x] POST /api/todos - 필수값 누락 (400)
+- [x] PUT /api/todos/:id - 정상 수정 (200)
+- [x] PUT /api/todos/:id - 타인 할일 (403)
+- [x] DELETE /api/todos/:id - 정상 삭제 (204)
+- [x] DELETE /api/todos/:id - 타인 할일 (403)
 ```
 
 ---
@@ -1167,13 +1167,13 @@ app.listen(PORT, () => {
 **담당자**: 백엔드 개발자
 
 #### 완료 조건 체크리스트
-- [ ] 로컬 환경 서버 실행 성공 (`npm run dev`)
-- [ ] 데이터베이스 연결 확인
-- [ ] 전체 API 엔드포인트 동작 확인
-- [ ] 에러 메시지 한국어 확인
-- [ ] HTTP 상태 코드 정확성 확인
-- [ ] 성능 확인 (< 200ms)
-- [ ] 보안 검증 (SQL Injection 방지)
+- [x] 로컬 환경 서버 실행 성공 (`npm run dev`)
+- [x] 데이터베이스 연결 확인
+- [x] 전체 API 엔드포인트 동작 확인
+- [x] 에러 메시지 한국어 확인
+- [x] HTTP 상태 코드 정확성 확인
+- [x] 성능 확인 (< 200ms)
+- [x] 보안 검증 (SQL Injection 방지)
 
 #### 의존성
 - BE-9 완료 필수
