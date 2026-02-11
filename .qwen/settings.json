@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "postgresql-mcp": {
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@henkey/postgres-mcp-server"
+      ]
+    }
+  },
+  "$version": 3
+}

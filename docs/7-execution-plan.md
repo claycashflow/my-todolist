@@ -497,28 +497,28 @@ BCRYPT_ROUNDS=10
 #### 완료 조건 체크리스트
 
 ##### UserDAO
-- [ ] `findByUsername(username)` 메서드 구현
+- [x] `findByUsername(username)` 메서드 구현
   - 반환: User 객체 또는 null
-- [ ] `findById(id)` 메서드 구현
+- [x] `findById(id)` 메서드 구현
   - 반환: User 객체 또는 null
-- [ ] `create(username, hashedPassword)` 메서드 구현
+- [x] `create(username, hashedPassword)` 메서드 구현
   - 반환: 생성된 User 객체 (id 포함)
   - 에러 처리: UNIQUE 제약 위반 → throw Error
 
 ##### TodoDAO
-- [ ] `findByUserId(userId)` 메서드 구현
+- [x] `findByUserId(userId)` 메서드 구현
   - 정렬: due_date ASC (마감일순)
   - 반환: Todo[] 배열
-- [ ] `findById(todoId)` 메서드 구현
+- [x] `findById(todoId)` 메서드 구현
   - 반환: Todo 객체 또는 null
-- [ ] `findByIdAndUserId(todoId, userId)` 메서드 구현
+- [x] `findByIdAndUserId(todoId, userId)` 메서드 구현
   - 반환: Todo 객체 또는 null (소유권 검증용)
-- [ ] `create(userId, title, description, dueDate)` 메서드 구현
+- [x] `create(userId, title, description, dueDate)` 메서드 구현
   - 반환: 생성된 Todo 객체
-- [ ] `update(todoId, updates)` 메서드 구현
+- [x] `update(todoId, updates)` 메서드 구현
   - partial update 지원 (변경할 필드만 전달)
   - 반환: 업데이트된 Todo 객체
-- [ ] `delete(todoId)` 메서드 구현
+- [x] `delete(todoId)` 메서드 구현
   - 반환: 삭제 성공 여부 (boolean)
 
 #### 의존성
@@ -652,13 +652,13 @@ export default new TodoDAO();
 #### 완료 조건 체크리스트
 
 ##### AuthService
-- [ ] `register(username, password)` 메서드 구현
+- [x] `register(username, password)` 메서드 구현
   - 입력값 검증 (username 4-20자, password 8자 이상)
   - bcrypt 해시화
   - DAO.create() 호출
   - 중복 username 에러 처리 (409)
   - 반환: { id, username, createdAt }
-- [ ] `login(username, password)` 메서드 구현
+- [x] `login(username, password)` 메서드 구현
   - DAO.findByUsername() 호출
   - bcrypt.compare() 검증
   - 불일치 에러 처리 (401)
@@ -666,27 +666,27 @@ export default new TodoDAO();
   - 반환: { token, user: { id, username } }
 
 ##### TodoService
-- [ ] `getUserTodos(userId)` 메서드 구현
+- [x] `getUserTodos(userId)` 메서드 구현
   - DAO.findByUserId() 호출
   - isOverdue 필드 계산 및 추가
   - 반환: Todo[] with isOverdue
-- [ ] `getTodo(todoId, userId)` 메서드 구현
+- [x] `getTodo(todoId, userId)` 메서드 구현
   - DAO.findByIdAndUserId() 호출 (소유권 검증)
   - 없는 할일 에러 처리 (404)
   - isOverdue 필드 계산 및 추가
   - 반환: Todo with isOverdue
-- [ ] `createTodo(userId, title, description, dueDate)` 메서드 구현
+- [x] `createTodo(userId, title, description, dueDate)` 메서드 구현
   - 입력값 검증
   - DAO.create() 호출
   - isOverdue 계산
   - 반환: 생성된 Todo with isOverdue
-- [ ] `updateTodo(todoId, userId, updates)` 메서드 구현
+- [x] `updateTodo(todoId, userId, updates)` 메서드 구현
   - 소유권 검증
   - 입력값 검증
   - DAO.update() 호출
   - isOverdue 계산
   - 반환: 업데이트된 Todo with isOverdue
-- [ ] `deleteTodo(todoId, userId)` 메서드 구현
+- [x] `deleteTodo(todoId, userId)` 메서드 구현
   - 소유권 검증
   - DAO.delete() 호출
   - 반환: 성공 여부
@@ -842,34 +842,34 @@ export default new TodoService();
 #### 완료 조건 체크리스트
 
 ##### AuthController
-- [ ] `register(req, res, next)` 메서드 구현
+- [x] `register(req, res, next)` 메서드 구현
   - Service.register() 호출
   - 201 응답 (성공)
   - 에러 처리 (400, 409)
-- [ ] `login(req, res, next)` 메서드 구현
+- [x] `login(req, res, next)` 메서드 구현
   - Service.login() 호출
   - 200 응답 + JWT 토큰
   - 에러 처리 (400, 401)
 
 ##### TodoController
-- [ ] `getTodos(req, res, next)` 메서드 구현
+- [x] `getTodos(req, res, next)` 메서드 구현
   - Service.getUserTodos() 호출
   - 200 응답 + Todo[]
   - isOverdue 필드 포함
-- [ ] `getTodo(req, res, next)` 메서드 구현
+- [x] `getTodo(req, res, next)` 메서드 구현
   - Service.getTodo() 호출
   - 200 응답 + Todo
   - 에러 처리 (404)
-- [ ] `createTodo(req, res, next)` 메서드 구현
+- [x] `createTodo(req, res, next)` 메서드 구현
   - Service.createTodo() 호출
   - 201 응답
   - 에러 처리 (400)
-- [ ] `updateTodo(req, res, next)` 메서드 구현
+- [x] `updateTodo(req, res, next)` 메서드 구현
   - Service.updateTodo() 호출
   - 200 응답
   - 부분 수정 지원
   - 에러 처리 (400, 403, 404)
-- [ ] `deleteTodo(req, res, next)` 메서드 구현
+- [x] `deleteTodo(req, res, next)` 메서드 구현
   - Service.deleteTodo() 호출
   - 204 응답
   - 에러 처리 (403, 404)
@@ -975,17 +975,17 @@ export default new TodoController();
 **담당자**: 백엔드 개발자
 
 #### 완료 조건 체크리스트
-- [ ] `authMiddleware` 구현 완료
+- [x] `authMiddleware` 구현 완료
   - Authorization 헤더에서 JWT 추출
   - JWT 검증 (유효성, 만료)
   - req.user에 payload 저장
   - 401 에러 처리
-- [ ] `errorHandler` 미들웨어 구현 완료
+- [x] `errorHandler` 미들웨어 구현 완료
   - 표준화된 에러 응답
   - 한국어 에러 메시지
   - HTTP 상태 코드 설정
   - 로깅 (개발 환경)
-- [ ] `validatorMiddleware` 구현 (선택)
+- [x] `validatorMiddleware` 구현 (선택)
   - 필수 필드 검증
   - 데이터 타입 검증
 
@@ -1050,18 +1050,18 @@ export const errorHandler = (error, req, res, next) => {
 **담당자**: 백엔드 개발자
 
 #### 완료 조건 체크리스트
-- [ ] 인증 라우트 정의
+- [x] 인증 라우트 정의
   - POST /api/auth/register
   - POST /api/auth/login
-- [ ] 할일 라우트 정의 (authMiddleware 적용)
+- [x] 할일 라우트 정의 (authMiddleware 적용)
   - GET /api/todos
   - GET /api/todos/:id
   - POST /api/todos
   - PUT /api/todos/:id
   - DELETE /api/todos/:id
-- [ ] 모든 라우트에 적절한 미들웨어 적용
-- [ ] CORS 설정 완료
-- [ ] 응답 형식 통일
+- [x] 모든 라우트에 적절한 미들웨어 적용
+- [x] CORS 설정 완료
+- [x] 응답 형식 통일
 
 #### 의존성
 - BE-7 완료 필수

@@ -3,7 +3,12 @@
     "allow": [
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(dir:*)"
+      "Bash(dir:*)",
+      "mcp__postgresql-mcp__pg_execute_query",
+      "mcp__postgresql-mcp__pg_monitor_database",
+      "mcp__postgresql-mcp__pg_execute_sql",
+      "Bash(node:*)",
+      "Bash(git push:*)"
     ]
   }
 }
