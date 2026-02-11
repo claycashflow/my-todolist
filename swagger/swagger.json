@@ -3,9 +3,14 @@
   "info": {
     "title": "my-todolist API",
     "version": "1.0.0",
-    "description": "PostgreSQL 기반 Todo 관리 RESTful API",
+    "description": "PostgreSQL 기반 Todo 관리 RESTful API\n\n이 API는 사용자 인증과 할일 관리를 위한 RESTful API입니다.\n\n- 회원가입 및 로그인을 통한 사용자 인증\n- 할일 생성, 조회, 수정, 삭제 기능\n- 마감일 기반 할일 관리 및 지연 상태 표시\n- JWT 기반 인증 (24시간 유효)\n\nAPI 사용을 위해서는 먼저 회원가입 후 로그인하여 JWT 토큰을 받아야 합니다.",
     "contact": {
-      "name": "API Support"
+      "name": "API Support",
+      "email": "support@example.com"
+    },
+    "license": {
+      "name": "MIT License",
+      "url": "http://github.com/gruntjs/grunt/blob/master/LICENSE-MIT"
     }
   },
   "servers": [
@@ -198,6 +203,55 @@
                 "example": {
                   "success": false,
                   "message": "사용자명 또는 비밀번호가 일치하지 않습니다"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "tags": ["인증"],
+        "summary": "로그아웃",
+        "description": "사용자 세션을 종료합니다 (JWT 토큰 만료 처리)",
+        "operationId": "logout",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "로그아웃 성공",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "로그아웃되었습니다"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "인증 실패",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                },
+                "example": {
+                  "success": false,
+                  "message": "로그인이 필요합니다"
                 }
               }
             }
@@ -638,7 +692,7 @@
         "type": "http",
         "scheme": "bearer",
         "bearerFormat": "JWT",
-        "description": "JWT 인증 토큰 (유효기간: 24시간)\n\n로그인 후 받은 토큰을 Authorization 헤더에 'Bearer {token}' 형식으로 전달"
+        "description": "JWT 인증 토큰 (유효기간: 24시간)\n\n- 로그인 후 JWT 토큰을 받습니다\n- 모든 인증이 필요한 요청에 대해 Authorization 헤더에 'Bearer {token}' 형식으로 토큰을 포함해야 합니다\n- 토큰이 없거나 유효하지 않은 경우 401 Unauthorized 응답을 받습니다"
       }
     },
     "schemas": {
@@ -648,20 +702,21 @@
           "id": {
             "type": "string",
             "format": "uuid",
-            "description": "사용자 고유 ID",
+            "description": "사용자 고유 ID (UUID v4 형식)",
             "example": "123e4567-e89b-12d3-a456-426614174000"
           },
           "username": {
             "type": "string",
             "minLength": 4,
             "maxLength": 20,
-            "description": "사용자명",
+            "pattern": "^[a-zA-Z0-9]+$",
+            "description": "사용자명 (4-20자, 영문/숫자만 허용, 고유)",
             "example": "johndoe"
           },
           "createdAt": {
             "type": "string",
             "format": "date-time",
-            "description": "계정 생성 일시",
+            "description": "계정 생성 일시 (ISO 8601 형식)",
             "example": "2026-02-11T10:30:00Z"
           }
         },
@@ -673,56 +728,56 @@
           "id": {
             "type": "string",
             "format": "uuid",
-            "description": "할일 고유 ID",
+            "description": "할일 고유 ID (UUID v4 형식)",
             "example": "550e8400-e29b-41d4-a716-446655440000"
           },
           "userId": {
             "type": "string",
             "format": "uuid",
-            "description": "할일 소유자 ID",
+            "description": "할일 소유자 ID (User.id 외래키)",
             "example": "123e4567-e89b-12d3-a456-426614174000"
           },
           "title": {
             "type": "string",
             "minLength": 1,
             "maxLength": 100,
-            "description": "할일 제목",
+            "description": "할일 제목 (1-100자)",
             "example": "프로젝트 기획서 작성"
           },
           "description": {
             "type": "string",
             "maxLength": 1000,
             "nullable": true,
-            "description": "할일 상세 설명 (선택)",
+            "description": "할일 상세 설명 (선택, 최대 1000자)",
             "example": "Q1 신규 프로젝트 기획서 초안 작성 및 검토 요청"
           },
           "dueDate": {
             "type": "string",
             "format": "date",
-            "description": "마감일 (YYYY-MM-DD)",
+            "description": "마감일 (YYYY-MM-DD 형식)",
             "example": "2026-02-28"
           },
           "done": {
             "type": "boolean",
-            "description": "완료 여부",
+            "description": "완료 여부 (기본값: false)",
             "default": false,
             "example": false
           },
           "isOverdue": {
             "type": "boolean",
-            "description": "마감일 초과 여부 (자동 계산: dueDate < today && done === false)",
+            "description": "마감일 초과 여부 (자동 계산: dueDate < 오늘 && done === false)\n\n- 마감일이 지났고, 완료되지 않은 할일에 대해 true\n- 시간은 고려하지 않고 날짜만 비교 (00:00:00 기준)\n- 완료된 할일(done=true)은 isOverdue가 false regardless of dueDate",
             "example": false
           },
           "createdAt": {
             "type": "string",
             "format": "date-time",
-            "description": "할일 생성 일시",
+            "description": "할일 생성 일시 (ISO 8601 형식)",
             "example": "2026-02-11T10:30:00Z"
           },
           "updatedAt": {
             "type": "string",
             "format": "date-time",
-            "description": "할일 수정 일시 (자동 갱신)",
+            "description": "할일 수정 일시 (ISO 8601 형식, 자동 갱신)",
             "example": "2026-02-11T15:45:00Z"
           }
         },
