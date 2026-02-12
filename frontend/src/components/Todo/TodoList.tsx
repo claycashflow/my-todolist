@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTodo } from '../context/TodoContext';
+import { useTodo } from '../../context/TodoContext';
 import TodoItem from './TodoItem';
 
 const TodoList: React.FC = () => {
