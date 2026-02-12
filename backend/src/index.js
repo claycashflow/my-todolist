@@ -1,11 +1,21 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import swaggerUi from 'swagger-ui-express';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 import routes from './routes.js';
 import { errorHandler } from './middleware/index.js';
 import pool, { checkDatabaseHealth, closeDatabaseConnection } from './config/database.js';
 
 dotenv.config();
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const swaggerDocument = JSON.parse(
+  readFileSync(join(__dirname, '../swagger.json'), 'utf8')
+);
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -17,6 +27,9 @@ app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:5173',
   credentials: true
 }));
+
+// Swagger UI
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // 라우트
 app.use(routes);
@@ -38,6 +51,7 @@ app.get('/', (req, res) => {
     version: '1.0.0',
     endpoints: {
       health: '/health',
+      docs: '/api-docs',
       auth: '/api/auth/*',
       todos: '/api/todos/*'
     }

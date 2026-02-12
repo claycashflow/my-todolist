@@ -8,7 +8,9 @@
       "mcp__postgresql-mcp__pg_monitor_database",
       "mcp__postgresql-mcp__pg_execute_sql",
       "Bash(node:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(npm install:*)",
+      "mcp__postgresql-mcp__pg_manage_schema"
     ]
   }
 }
