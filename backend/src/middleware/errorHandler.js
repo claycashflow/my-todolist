@@ -1,8 +1,6 @@
-import { DomainException } from '../build/domain/exceptions/DomainException.js';
-
 export const errorHandler = (error, req, res, next) => {
-  // DomainException 처리
-  if (error instanceof DomainException) {
+  // DomainException 처리 (code와 statusCode 속성으로 판단)
+  if (error.code && error.statusCode && error.name && error.name.includes('Error')) {
     res.status(error.statusCode).json({
       success: false,
       message: error.message,

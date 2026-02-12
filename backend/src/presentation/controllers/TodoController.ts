@@ -29,7 +29,7 @@ export class TodoController {
   async getTodos(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.user!.id;
-      const todos = await this.getUserTodosUseCase.execute(userId);
+      const todos = await this.getUserTodosUseCase.execute(userId as any);
       res.status(200).json({ success: true, data: todos });
     } catch (error) {
       next(error);
@@ -38,9 +38,9 @@ export class TodoController {
 
   async getTodo(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const todoId = parseInt(req.params.id as string);
+      const todoId = req.params.id as string;
       const userId = req.user!.id;
-      const todo = await this.getTodoUseCase.execute(todoId, userId);
+      const todo = await this.getTodoUseCase.execute(todoId as any, userId as any);
       res.status(200).json({ success: true, data: todo });
     } catch (error) {
       next(error);
@@ -53,7 +53,7 @@ export class TodoController {
       const { title, description, dueDate } = req.body;
 
       const todo = await this.createTodoUseCase.execute({
-        userId,
+        userId: userId as any,
         title,
         description: description || null,
         dueDate,
@@ -67,10 +67,10 @@ export class TodoController {
 
   async updateTodo(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const todoId = parseInt(req.params.id as string);
+      const todoId = req.params.id as string;
       const userId = req.user!.id;
 
-      const todo = await this.updateTodoUseCase.execute(todoId, userId, req.body);
+      const todo = await this.updateTodoUseCase.execute(todoId as any, userId as any, req.body);
       res.status(200).json({ success: true, data: todo });
     } catch (error) {
       next(error);
@@ -79,10 +79,10 @@ export class TodoController {
 
   async deleteTodo(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const todoId = parseInt(req.params.id as string);
+      const todoId = req.params.id as string;
       const userId = req.user!.id;
 
-      await this.deleteTodoUseCase.execute(todoId, userId);
+      await this.deleteTodoUseCase.execute(todoId as any, userId as any);
       res.status(204).send();
     } catch (error) {
       next(error);

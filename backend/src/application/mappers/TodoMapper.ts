@@ -8,7 +8,7 @@ export interface DbTodoRow {
   user_id: number;
   title: string;
   description: string | null;
-  due_date: string;
+  due_date: string | Date; // PostgreSQL DATE는 Date 객체로 변환될 수 있음
   done: boolean;
   created_at: Date;
   updated_at: Date;
@@ -19,12 +19,17 @@ export class TodoMapper {
    * DB 레코드를 Domain Entity로 변환
    */
   static toDomain(dbRow: DbTodoRow): Todo {
+    // PostgreSQL DATE 타입은 Date 객체로 변환될 수 있으므로 문자열로 변환
+    const dueDateStr = dbRow.due_date instanceof Date
+      ? dbRow.due_date.toISOString().split('T')[0]
+      : dbRow.due_date;
+
     const props: TodoProps = {
       id: dbRow.id,
       userId: dbRow.user_id,
       title: new TodoTitle(dbRow.title),
       description: dbRow.description,
-      dueDate: new DueDate(dbRow.due_date),
+      dueDate: new DueDate(dueDateStr),
       done: dbRow.done,
       createdAt: dbRow.created_at,
       updatedAt: dbRow.updated_at,
