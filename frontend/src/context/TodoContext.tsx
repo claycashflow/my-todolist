@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { todoService, Todo, CreateTodoRequest, UpdateTodoRequest } from '../services/todoService';
+import { todoService, type Todo, type CreateTodoRequest, type UpdateTodoRequest } from '../services/todoService';
 import { useAuth } from './AuthContext';
 
 interface TodoContextType {

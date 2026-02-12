@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authService } from '../services/authService';
+import { useLanguage } from '../context/LanguageContext';
 
 const RegisterPage: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -9,25 +10,26 @@ const RegisterPage: React.FC = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
-  
+
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const validateInputs = () => {
     if (username.length < 4 || username.length > 20) {
-      setError('아이디는 4~20자의 영문과 숫자로 입력해주세요');
+      setError(t.register.usernameInvalid);
       return false;
     }
-    
+
     if (password.length < 8) {
-      setError('비밀번호는 8자 이상 입력해주세요');
+      setError(t.register.passwordTooShort);
       return false;
     }
-    
+
     if (password !== confirmPassword) {
-      setError('비밀번호가 일치하지 않습니다');
+      setError(t.register.passwordMismatch);
       return false;
     }
-    
+
     return true;
   };
 
@@ -35,7 +37,7 @@ const RegisterPage: React.FC = () => {
     e.preventDefault();
     setError('');
     setSuccessMessage('');
-    
+
     if (!validateInputs()) {
       return;
     }
@@ -44,15 +46,15 @@ const RegisterPage: React.FC = () => {
 
     try {
       await authService.register(username, password);
-      setSuccessMessage('회원가입이 완료되었습니다. 로그인해주세요.');
+      setSuccessMessage(t.register.success);
       setTimeout(() => {
         navigate('/login');
       }, 2000);
     } catch (err: any) {
       if (err.response?.status === 409) {
-        setError('이미 사용 중인 아이디입니다');
+        setError(t.register.usernameTaken);
       } else {
-        setError('회원가입에 실패했습니다. 다시 시도해주세요.');
+        setError(t.errors.registerFailed);
       }
     } finally {
       setLoading(false);
@@ -62,14 +64,14 @@ const RegisterPage: React.FC = () => {
   return (
     <div className="auth-container">
       <div className="auth-form">
-        <h2>회원가입</h2>
-        
+        <h2>{t.register.title}</h2>
+
         {error && <div className="error-message">{error}</div>}
         {successMessage && <div className="success-message">{successMessage}</div>}
-        
+
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="username">아이디</label>
+            <label htmlFor="username">{t.common.username}</label>
             <input
               id="username"
               type="text"
@@ -77,12 +79,12 @@ const RegisterPage: React.FC = () => {
               onChange={(e) => setUsername(e.target.value)}
               required
               disabled={loading}
-              placeholder="4~20자, 영문/숫자만"
+              placeholder={t.register.usernamePlaceholder}
             />
           </div>
-          
+
           <div className="form-group">
-            <label htmlFor="password">비밀번호</label>
+            <label htmlFor="password">{t.common.password}</label>
             <input
               id="password"
               type="password"
@@ -90,12 +92,12 @@ const RegisterPage: React.FC = () => {
               onChange={(e) => setPassword(e.target.value)}
               required
               disabled={loading}
-              placeholder="8자 이상"
+              placeholder={t.register.passwordPlaceholder}
             />
           </div>
-          
+
           <div className="form-group">
-            <label htmlFor="confirmPassword">비밀번호 확인</label>
+            <label htmlFor="confirmPassword">{t.register.confirmPassword}</label>
             <input
               id="confirmPassword"
               type="password"
@@ -105,14 +107,14 @@ const RegisterPage: React.FC = () => {
               disabled={loading}
             />
           </div>
-          
+
           <button type="submit" disabled={loading} className="btn btn-primary">
-            {loading ? '처리 중...' : '가입하기'}
+            {loading ? t.register.processing : t.register.button}
           </button>
         </form>
-        
+
         <div className="auth-link">
-          이미 계정이 있으신가요? <Link to="/login">로그인</Link>
+          {t.register.hasAccount} <Link to="/login">{t.register.signIn}</Link>
         </div>
       </div>
     </div>

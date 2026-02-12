@@ -2,6 +2,24 @@ import { TodoDAO } from '../dao/index.js';
 
 class TodoService {
   /**
+   * DB 객체를 API 응답 형식으로 변환 (snake_case → camelCase)
+   * @param {Object} todo - DB에서 조회한 할일 객체
+   * @returns {Object} 변환된 할일 객체
+   */
+  transformTodoResponse(todo) {
+    return {
+      id: todo.id,
+      userId: todo.user_id,
+      title: todo.title,
+      description: todo.description,
+      dueDate: todo.due_date,
+      done: todo.done,
+      createdAt: todo.created_at,
+      updatedAt: todo.updated_at
+    };
+  }
+
+  /**
    * 마감일 지연 여부 계산
    * @param {string} dueDate - 마감일 (YYYY-MM-DD)
    * @param {boolean} done - 완료 여부
@@ -21,7 +39,7 @@ class TodoService {
   async getUserTodos(userId) {
     const todos = await TodoDAO.findByUserId(userId);
     return todos.map(todo => ({
-      ...todo,
+      ...this.transformTodoResponse(todo),
       isOverdue: this.calculateIsOverdue(todo.due_date, todo.done)
     }));
   }
@@ -39,7 +57,7 @@ class TodoService {
       throw new Error('할일을 찾을 수 없습니다');
     }
     return {
-      ...todo,
+      ...this.transformTodoResponse(todo),
       isOverdue: this.calculateIsOverdue(todo.due_date, todo.done)
     };
   }
@@ -70,7 +88,7 @@ class TodoService {
 
     const todo = await TodoDAO.create(userId, title, description, dueDate);
     return {
-      ...todo,
+      ...this.transformTodoResponse(todo),
       isOverdue: this.calculateIsOverdue(todo.due_date, todo.done)
     };
   }
@@ -90,25 +108,32 @@ class TodoService {
       throw new Error('권한이 없습니다');
     }
 
+    // camelCase를 snake_case로 변환
+    const dbUpdates = {};
+    if (updates.title !== undefined) dbUpdates.title = updates.title;
+    if (updates.description !== undefined) dbUpdates.description = updates.description;
+    if (updates.dueDate !== undefined) dbUpdates.due_date = updates.dueDate;
+    if (updates.done !== undefined) dbUpdates.done = updates.done;
+
     // 입력값 검증
-    if (updates.title !== undefined) {
-      if (!updates.title || updates.title.length > 100) {
+    if (dbUpdates.title !== undefined) {
+      if (!dbUpdates.title || dbUpdates.title.length > 100) {
         throw new Error('제목은 1~100자로 입력해주세요');
       }
     }
 
-    if (updates.due_date !== undefined) {
+    if (dbUpdates.due_date !== undefined) {
       const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-      if (!dateRegex.test(updates.due_date)) {
+      if (!dateRegex.test(dbUpdates.due_date)) {
         throw new Error('유효한 마감일을 입력해주세요');
       }
     }
 
-    const updated = await TodoDAO.update(todoId, updates);
+    const updated = await TodoDAO.update(todoId, dbUpdates);
     if (!updated) return null;
 
     return {
-      ...updated,
+      ...this.transformTodoResponse(updated),
       isOverdue: this.calculateIsOverdue(updated.due_date, updated.done)
     };
   }

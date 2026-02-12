@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTodo } from '../../context/TodoContext';
+import { useLanguage } from '../../context/LanguageContext';
 import TodoForm from './TodoForm';
 import { formatDate } from '../../utils/dateUtils';
 
@@ -9,6 +10,7 @@ interface TodoItemProps {
 
 const TodoItem: React.FC<TodoItemProps> = ({ todo }) => {
   const { toggleTodoDone, deleteTodo, updateTodo } = useTodo();
+  const { t } = useLanguage();
   const [showEditForm, setShowEditForm] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -48,24 +50,24 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo }) => {
             <div className="todo-details">
               <div className="todo-meta">
                 <span className="due-date">
-                  마감일: {formatDate(todo.dueDate)}
-                  {todo.isOverdue && !todo.done && <span className="overdue-badge"> ⚠️ (지연)</span>}
+                  {t.common.dueDate}: {formatDate(todo.dueDate)}
+                  {todo.isOverdue && !todo.done && <span className="overdue-badge"> ⚠️ ({t.todo.overdue})</span>}
                 </span>
                 {todo.description && <p className="todo-description">{todo.description}</p>}
               </div>
-              
+
               <div className="todo-actions">
-                <button 
-                  onClick={() => setShowEditForm(true)} 
+                <button
+                  onClick={() => setShowEditForm(true)}
                   className="btn btn-secondary btn-small"
                 >
-                  수정
+                  {t.common.edit}
                 </button>
-                <button 
-                  onClick={() => setShowDeleteConfirm(true)} 
+                <button
+                  onClick={() => setShowDeleteConfirm(true)}
                   className="btn btn-danger btn-small"
                 >
-                  삭제
+                  {t.common.delete}
                 </button>
               </div>
             </div>
@@ -73,12 +75,12 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo }) => {
         </>
       ) : (
         <div className="todo-edit-form">
-          <h3>할일 수정</h3>
-          <TodoForm 
+          <h3>{t.todo.editTitle}</h3>
+          <TodoForm
             initialData={{
               title: todo.title,
               description: todo.description || '',
-              dueDate: todo.dueDate,
+              dueDate: formatDate(todo.dueDate),
               done: todo.done
             }}
             onSubmit={handleUpdate}
@@ -90,20 +92,20 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo }) => {
       {showDeleteConfirm && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <h3>정말 삭제하시겠습니까?</h3>
-            <p>"{todo.title}" 할일을 삭제하면 볡구할 수 없습니다.</p>
+            <h3>{t.todo.deleteConfirm}</h3>
+            <p>"{todo.title}" {t.todo.deleteMessage}</p>
             <div className="modal-actions">
-              <button 
-                onClick={() => setShowDeleteConfirm(false)} 
+              <button
+                onClick={() => setShowDeleteConfirm(false)}
                 className="btn btn-secondary"
               >
-                취소
+                {t.common.cancel}
               </button>
-              <button 
-                onClick={handleDelete} 
+              <button
+                onClick={handleDelete}
                 className="btn btn-danger"
               >
-                삭제하기
+                {t.todo.deleteButton}
               </button>
             </div>
           </div>

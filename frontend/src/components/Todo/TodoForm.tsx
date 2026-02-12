@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTodo } from '../../context/TodoContext';
-import { CreateTodoRequest, UpdateTodoRequest } from '../../services/todoService';
+import { useLanguage } from '../../context/LanguageContext';
+import type { CreateTodoRequest, UpdateTodoRequest } from '../../services/todoService';
 
 interface TodoFormProps {
   initialData?: {
@@ -15,6 +16,7 @@ interface TodoFormProps {
 
 const TodoForm: React.FC<TodoFormProps> = ({ initialData, onSubmit, onCancel }) => {
   const { createTodo } = useTodo();
+  const { t } = useLanguage();
   const [title, setTitle] = useState(initialData?.title || '');
   const [description, setDescription] = useState(initialData?.description || '');
   const [dueDate, setDueDate] = useState(initialData?.dueDate || '');
@@ -26,17 +28,17 @@ const TodoForm: React.FC<TodoFormProps> = ({ initialData, onSubmit, onCancel }) 
     setError('');
 
     if (!title.trim()) {
-      setError('제목은 1자 이상 입력해주세요');
+      setError(t.errors.titleRequired);
       return;
     }
 
     if (title.length > 100) {
-      setError('제목은 100자 이하로 입력해주세요');
+      setError(t.errors.titleTooLong);
       return;
     }
 
     if (!dueDate) {
-      setError('유효한 마감일을 입력해주세요');
+      setError(t.errors.dueDateRequired);
       return;
     }
 
@@ -57,16 +59,16 @@ const TodoForm: React.FC<TodoFormProps> = ({ initialData, onSubmit, onCancel }) 
         onSubmit(formData as CreateTodoRequest);
       }
     } catch (err) {
-      setError('할일 저장에 실패했습니다. 다시 시도해주세요.');
+      setError(t.errors.saveFailed);
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="todo-form">
       {error && <div className="error-message">{error}</div>}
-      
+
       <div className="form-group">
-        <label htmlFor="title">제목 *</label>
+        <label htmlFor="title">{t.common.title} *</label>
         <input
           id="title"
           type="text"
@@ -74,24 +76,24 @@ const TodoForm: React.FC<TodoFormProps> = ({ initialData, onSubmit, onCancel }) 
           onChange={(e) => setTitle(e.target.value)}
           required
           maxLength={100}
-          placeholder="1~100자"
+          placeholder={t.todo.titlePlaceholder}
         />
       </div>
-      
+
       <div className="form-group">
-        <label htmlFor="description">설명</label>
+        <label htmlFor="description">{t.common.description}</label>
         <textarea
           id="description"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           maxLength={1000}
-          placeholder="최대 1000자"
+          placeholder={t.todo.descriptionPlaceholder}
           rows={3}
         />
       </div>
-      
+
       <div className="form-group">
-        <label htmlFor="dueDate">마감일 *</label>
+        <label htmlFor="dueDate">{t.common.dueDate} *</label>
         <input
           id="dueDate"
           type="date"
@@ -100,7 +102,7 @@ const TodoForm: React.FC<TodoFormProps> = ({ initialData, onSubmit, onCancel }) 
           required
         />
       </div>
-      
+
       <div className="form-group checkbox-group">
         <label>
           <input
@@ -108,16 +110,16 @@ const TodoForm: React.FC<TodoFormProps> = ({ initialData, onSubmit, onCancel }) 
             checked={done}
             onChange={(e) => setDone(e.target.checked)}
           />
-          완료됨
+          {t.todo.done}
         </label>
       </div>
-      
+
       <div className="form-actions">
         <button type="button" onClick={onCancel} className="btn btn-secondary">
-          취소
+          {t.common.cancel}
         </button>
         <button type="submit" className="btn btn-primary">
-          {initialData ? '수정하기' : '추가하기'}
+          {initialData ? t.todo.updateButton : t.todo.addButton}
         </button>
       </div>
     </form>

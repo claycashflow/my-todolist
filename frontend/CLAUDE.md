@@ -6,6 +6,10 @@
 
 React 19 + TypeScript + Vite 기반의 할 일 관리 웹 애플리케이션 프론트엔드. Context API로 상태를 관리하고, React Router로 라우팅을 처리하며, Axios를 통해 백엔드 API와 통신합니다.
 
+## 반드시 준수할 것
+- SOLID 원칙 준수
+- Clean Architecture 준수
+
 ## 빌드 및 실행 명령어
 
 ```bash

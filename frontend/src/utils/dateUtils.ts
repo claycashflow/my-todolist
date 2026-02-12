@@ -4,10 +4,21 @@
  * @returns Formatted date string in YYYY-MM-DD format
  */
 export const formatDate = (dateString: string): string => {
+  // 이미 YYYY-MM-DD 형식이면 그대로 반환
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateString)) {
+    return dateString;
+  }
+
+  // ISO 형식(YYYY-MM-DDTHH:mm:ss.sssZ)이면 날짜 부분만 추출
+  if (dateString.includes('T')) {
+    return dateString.split('T')[0];
+  }
+
+  // 그 외의 경우 UTC 기준으로 파싱하여 변환
   const date = new Date(dateString);
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const day = String(date.getDate()).padStart(2, '0');
+  const year = date.getUTCFullYear();
+  const month = String(date.getUTCMonth() + 1).padStart(2, '0');
+  const day = String(date.getUTCDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 };
 
@@ -19,14 +30,12 @@ export const formatDate = (dateString: string): string => {
  */
 export const isOverdue = (dueDate: string, done: boolean): boolean => {
   if (done) return false;
-  
-  const today = new Date();
-  today.setHours(0, 0, 0, 0); // Set time to start of day for comparison
-  
-  const due = new Date(dueDate);
-  due.setHours(0, 0, 0, 0); // Set time to start of day for comparison
-  
-  return due < today;
+
+  // YYYY-MM-DD 형식으로 문자열 비교 (시간대 문제 방지)
+  const today = new Date().toISOString().split('T')[0];
+  const formattedDueDate = formatDate(dueDate);
+
+  return formattedDueDate < today;
 };
 
 /**

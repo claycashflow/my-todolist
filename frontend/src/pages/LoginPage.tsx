@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 
 const LoginPage: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  
+
   const { login } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -20,7 +22,7 @@ const LoginPage: React.FC = () => {
       await login(username, password);
       navigate('/todos', { replace: true });
     } catch (err) {
-      setError('아이디 또는 비밀번호가 일치하지 않습니다');
+      setError(t.errors.loginFailed);
     } finally {
       setLoading(false);
     }
@@ -29,42 +31,44 @@ const LoginPage: React.FC = () => {
   return (
     <div className="auth-container">
       <div className="auth-form">
-        <h2>로그인</h2>
-        
+        <h2>{t.login.title}</h2>
+
         {error && <div className="error-message">{error}</div>}
-        
+
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="username">아이디</label>
+            <label htmlFor="username">{t.common.username}</label>
             <input
               id="username"
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
+              placeholder={t.login.emailPlaceholder}
               required
               disabled={loading}
             />
           </div>
-          
+
           <div className="form-group">
-            <label htmlFor="password">비밀번호</label>
+            <label htmlFor="password">{t.common.password}</label>
             <input
               id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              placeholder={t.login.passwordPlaceholder}
               required
               disabled={loading}
             />
           </div>
-          
+
           <button type="submit" disabled={loading} className="btn btn-primary">
-            {loading ? '로그인 중...' : '로그인 하기'}
+            {loading ? t.common.loading : t.login.button}
           </button>
         </form>
-        
+
         <div className="auth-link">
-          계정이 없으신가요? <Link to="/register">회원가입</Link>
+          {t.login.noAccount} <Link to="/register">{t.login.signUp}</Link>
         </div>
       </div>
     </div>

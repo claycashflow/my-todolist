@@ -1,0 +1,176 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 2400" style="background-color: #1e1e1e;">
+  <style>
+    .title { font: bold 24px 'Courier New', monospace; fill: #4EC9B0; }
+    .section { font: bold 18px 'Courier New', monospace; fill: #DCDCAA; }
+    .text { font: 14px 'Courier New', monospace; fill: #D4D4D4; }
+    .comment { font: 14px 'Courier New', monospace; fill: #6A9955; }
+    .path { font: 14px 'Courier New', monospace; fill: #CE9178; }
+    .arrow { font: 16px 'Courier New', monospace; fill: #569CD6; }
+    .box { fill: none; stroke: #569CD6; stroke-width: 2; }
+    .icon { font: 20px 'Courier New', monospace; }
+  </style>
+
+  <!-- Title -->
+  <text x="20" y="40" class="title">my-todolist/ 애플리케이션 구조</text>
+  <line x1="20" y1="50" x2="600" y2="50" stroke="#4EC9B0" stroke-width="2"/>
+
+  <!-- Documentation & Config Section -->
+  <text x="20" y="90" class="section">📚 Documentation &amp; Config</text>
+  <text x="40" y="120" class="path">├── docs/</text>
+  <text x="180" y="120" class="comment"># 프로젝트 문서</text>
+  <text x="60" y="145" class="text">│   ├── 1-domain-definition.md</text>
+  <text x="60" y="170" class="text">│   ├── 2-PRD.md</text>
+  <text x="60" y="195" class="text">│   ├── 3-user-scenario.md</text>
+  <text x="60" y="220" class="text">│   ├── 4-project-principle.md</text>
+  <text x="60" y="245" class="text">│   ├── 5-arch-diagram.md</text>
+  <text x="60" y="270" class="text">│   ├── 6-ERD.md</text>
+  <text x="60" y="295" class="text">│   └── 8-wireframe.md</text>
+
+  <text x="40" y="325" class="path">├── database/</text>
+  <text x="200" y="325" class="comment"># DB 스키마</text>
+  <text x="60" y="350" class="text">│   └── schema.sql</text>
+
+  <text x="40" y="380" class="path">├── swagger/</text>
+  <text x="200" y="380" class="comment"># API 명세</text>
+  <text x="60" y="405" class="text">│   └── swagger.json</text>
+
+  <text x="40" y="435" class="path">└── mockup/</text>
+  <text x="200" y="435" class="comment"># 목업 서버</text>
+
+  <!-- Backend Section -->
+  <text x="20" y="480" class="section">🖥️  Backend (Node.js/Express)</text>
+  <text x="40" y="510" class="path">└── backend/</text>
+  <text x="60" y="535" class="text">├── src/</text>
+  <text x="80" y="560" class="text">│   ├── index.js</text>
+  <text x="250" y="560" class="comment"># Express 앱 진입점</text>
+  <text x="80" y="585" class="text">│   ├── routes.js</text>
+  <text x="250" y="585" class="comment"># 라우트 정의</text>
+
+  <text x="80" y="620" class="path">│   ├── controllers/</text>
+  <text x="280" y="620" class="comment"># 요청 처리 레이어</text>
+  <text x="100" y="645" class="text">│   │   ├── AuthController.js</text>
+  <text x="100" y="670" class="text">│   │   └── TodoController.js</text>
+
+  <text x="80" y="705" class="path">│   ├── services/</text>
+  <text x="280" y="705" class="comment"># 비즈니스 로직 레이어</text>
+  <text x="100" y="730" class="text">│   │   ├── AuthService.js</text>
+  <text x="100" y="755" class="text">│   │   └── TodoService.js</text>
+
+  <text x="80" y="790" class="path">│   ├── dao/</text>
+  <text x="280" y="790" class="comment"># 데이터 접근 레이어</text>
+  <text x="100" y="815" class="text">│   │   ├── UserDAO.js</text>
+  <text x="100" y="840" class="text">│   │   └── TodoDAO.js</text>
+
+  <text x="80" y="875" class="path">│   ├── middleware/</text>
+  <text x="280" y="875" class="comment"># 미들웨어 레이어</text>
+  <text x="100" y="900" class="text">│   │   ├── authMiddleware.js</text>
+  <text x="100" y="925" class="text">│   │   ├── errorHandler.js</text>
+  <text x="100" y="950" class="text">│   │   └── validatorMiddleware.js</text>
+
+  <text x="80" y="985" class="path">│   ├── config/</text>
+  <text x="280" y="985" class="comment"># 설정 파일</text>
+  <text x="80" y="1010" class="path">│   └── __tests__/</text>
+  <text x="280" y="1010" class="comment"># 테스트 코드</text>
+
+  <text x="60" y="1045" class="text">├── package.json</text>
+  <text x="60" y="1070" class="text">├── swagger.json</text>
+  <text x="60" y="1095" class="text">└── TEST_GUIDE.md</text>
+
+  <!-- Frontend Section -->
+  <text x="20" y="1140" class="section">🌐 Frontend (React + TypeScript)</text>
+  <text x="40" y="1170" class="path">└── frontend/</text>
+  <text x="60" y="1195" class="text">├── src/</text>
+  <text x="80" y="1220" class="text">│   ├── main.tsx</text>
+  <text x="250" y="1220" class="comment"># React 앱 진입점</text>
+  <text x="80" y="1245" class="text">│   ├── App.tsx</text>
+  <text x="250" y="1245" class="comment"># 루트 컴포넌트</text>
+
+  <text x="80" y="1280" class="path">│   ├── pages/</text>
+  <text x="280" y="1280" class="comment"># 페이지 컴포넌트</text>
+  <text x="100" y="1305" class="text">│   │   ├── LoginPage.tsx</text>
+  <text x="100" y="1330" class="text">│   │   ├── RegisterPage.tsx</text>
+  <text x="100" y="1355" class="text">│   │   ├── TodoPage.tsx</text>
+  <text x="100" y="1380" class="text">│   │   └── NotFoundPage.tsx</text>
+
+  <text x="80" y="1415" class="path">│   ├── components/</text>
+  <text x="280" y="1415" class="comment"># 재사용 컴포넌트</text>
+  <text x="100" y="1440" class="text">│   │   ├── Auth/</text>
+  <text x="280" y="1440" class="comment"># 인증 관련</text>
+  <text x="100" y="1465" class="text">│   │   ├── Todo/</text>
+  <text x="280" y="1465" class="comment"># 할일 관련</text>
+  <text x="100" y="1490" class="text">│   │   └── Common/</text>
+  <text x="280" y="1490" class="comment"># 공통 컴포넌트</text>
+
+  <text x="80" y="1525" class="path">│   ├── context/</text>
+  <text x="280" y="1525" class="comment"># React Context (상태 관리)</text>
+  <text x="100" y="1550" class="text">│   │   ├── AuthContext.tsx</text>
+  <text x="100" y="1575" class="text">│   │   └── TodoContext.tsx</text>
+
+  <text x="80" y="1610" class="path">│   ├── services/</text>
+  <text x="280" y="1610" class="comment"># API 통신 레이어</text>
+  <text x="100" y="1635" class="text">│   │   ├── api.ts</text>
+  <text x="100" y="1660" class="text">│   │   ├── authService.ts</text>
+  <text x="100" y="1685" class="text">│   │   └── todoService.ts</text>
+
+  <text x="80" y="1720" class="path">│   ├── hooks/</text>
+  <text x="280" y="1720" class="comment"># 커스텀 훅</text>
+  <text x="80" y="1745" class="path">│   ├── utils/</text>
+  <text x="280" y="1745" class="comment"># 유틸리티 함수</text>
+  <text x="80" y="1770" class="path">│   ├── styles/</text>
+  <text x="280" y="1770" class="comment"># 스타일 파일</text>
+  <text x="80" y="1795" class="path">│   └── assets/</text>
+  <text x="280" y="1795" class="comment"># 정적 자원</text>
+
+  <text x="60" y="1830" class="text">├── package.json</text>
+  <text x="60" y="1855" class="text">└── vite.config.ts</text>
+
+  <!-- Architecture Flow -->
+  <text x="20" y="1910" class="section">📊 아키텍처 플로우</text>
+  <line x1="20" y1="1920" x2="600" y2="1920" stroke="#DCDCAA" stroke-width="2"/>
+
+  <rect x="100" y="1940" width="400" height="40" class="box"/>
+  <text x="170" y="1965" class="text">Client (Browser)</text>
+
+  <text x="290" y="2000" class="arrow">↓</text>
+
+  <rect x="100" y="2010" width="400" height="100" class="box"/>
+  <text x="130" y="2035" class="text">Frontend (React + TypeScript)</text>
+  <text x="140" y="2060" class="text">Pages → Components → Context/Hooks</text>
+  <text x="180" y="2085" class="text">↓ Services (API 호출)</text>
+
+  <text x="280" y="2125" class="arrow">↓ HTTP/REST API</text>
+
+  <rect x="100" y="2135" width="400" height="100" class="box"/>
+  <text x="130" y="2160" class="text">Backend (Node.js + Express)</text>
+  <text x="140" y="2185" class="text">Routes → Middleware → Controllers</text>
+  <text x="180" y="2210" class="text">↓ Services → DAO</text>
+
+  <text x="290" y="2250" class="arrow">↓</text>
+
+  <rect x="100" y="2260" width="400" height="40" class="box"/>
+  <text x="200" y="2285" class="text">Database (PostgreSQL)</text>
+
+  <!-- Tech Stack -->
+  <text x="650" y="90" class="section">🔑 주요 기술 스택</text>
+  <line x1="650" y1="100" x2="1100" y2="100" stroke="#DCDCAA" stroke-width="2"/>
+
+  <text x="670" y="135" class="text">Backend:</text>
+  <text x="780" y="135" class="comment">Node.js, Express,</text>
+  <text x="780" y="160" class="comment">PostgreSQL, JWT</text>
+
+  <text x="670" y="200" class="text">Frontend:</text>
+  <text x="780" y="200" class="comment">React, TypeScript,</text>
+  <text x="780" y="225" class="comment">Vite, Context API</text>
+
+  <text x="670" y="265" class="text">Testing:</text>
+  <text x="780" y="265" class="comment">Jest, Supertest</text>
+
+  <text x="670" y="305" class="text">Docs:</text>
+  <text x="780" y="305" class="comment">Swagger/OpenAPI</text>
+
+  <text x="670" y="350" class="section">📐 아키텍처 패턴</text>
+  <text x="680" y="380" class="comment">• 3-Tier Architecture</text>
+  <text x="680" y="405" class="comment">• MVC Pattern</text>
+  <text x="680" y="430" class="comment">• RESTful API</text>
+  <text x="680" y="455" class="comment">• Component-Based UI</text>
+</svg>
