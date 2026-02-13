@@ -24,7 +24,7 @@ export interface AuthResponse {
 export interface User {
   id: string;
   username: string;
-  createdAt: string;
+  createdAt?: string;
 }
 
 export const authService = {

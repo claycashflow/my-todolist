@@ -8,11 +8,11 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-const getUserThemeKey = (userId: number | null): string => {
+const getUserThemeKey = (userId: string | null): string => {
   return userId ? `user_${userId}_theme` : 'theme';
 };
 
-const loadUserTheme = (userId: number | null): boolean => {
+const loadUserTheme = (userId: string | null): boolean => {
   const key = getUserThemeKey(userId);
   const saved = localStorage.getItem(key);
   return saved === 'dark';

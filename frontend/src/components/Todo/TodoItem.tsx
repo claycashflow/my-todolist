@@ -25,7 +25,7 @@ const TodoItem: React.FC<TodoItemProps> = ({ todo }) => {
     }
   };
 
-  const handleUpdate = async (formData: { title: string; description?: string; dueDate: string }) => {
+  const handleUpdate = async (formData: import('../../services/todoService').CreateTodoRequest | import('../../services/todoService').UpdateTodoRequest) => {
     await updateTodo(todo.id, formData);
     setShowEditForm(false);
   };

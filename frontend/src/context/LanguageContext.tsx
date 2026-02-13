@@ -16,11 +16,11 @@ const translations = { ko, en };
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-const getUserLanguageKey = (userId: number | null): string => {
+const getUserLanguageKey = (userId: string | null): string => {
   return userId ? `user_${userId}_language` : 'language';
 };
 
-const loadUserLanguage = (userId: number | null): Language => {
+const loadUserLanguage = (userId: string | null): Language => {
   const key = getUserLanguageKey(userId);
   const saved = localStorage.getItem(key) as Language;
   return saved === 'en' || saved === 'ko' ? saved : 'ko';
