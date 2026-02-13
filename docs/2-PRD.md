@@ -3,11 +3,11 @@
 
 ---
 
-**버전**: 1.1
+**버전**: 2.0
 **작성일**: 2026-02-11
-**최종 수정**: 2026-02-11
+**최종 수정**: 2026-02-13
 **작성자**: 제품 관리팀
-**상태**: MVP 개발 진행 중
+**상태**: MVP 개발 완료 (Clean Architecture 적용)
 
 ---
 
@@ -139,17 +139,26 @@ my-todolist는 웹 기반으로 언제 어디서나 개인 할 일을 효율적�
   - 모든 에러 메시지는 한국어로 제공
   - 성공/실패 피드백 (토스트 또는 알림)
 
-### 4.2 MVP 미포함 기능 (Phase 2 이후)
+### 4.2 추가 구현 완료 기능 (Phase 1.5)
+
+- ✅ **다크 모드**: ThemeContext를 통한 라이트/다크 테마 전환
+- ✅ **다국어 지원**: LanguageContext를 통한 언어 설정 (한국어/영어 등)
+- ✅ **API 문서화**: Swagger UI (`/api-docs` 엔드포인트)
+- ✅ **헬스 체크**: `/health` 엔드포인트로 서버 및 DB 상태 확인
+- ✅ **Graceful Shutdown**: SIGTERM/SIGINT 시그널 처리
+- ✅ **테스트 프레임워크**: Jest (백엔드), Vitest (프론트엔드)
+
+### 4.3 MVP 미포함 기능 (Phase 2 이후)
 
 - 할일 카테고리/라벨 분류
 - 반복 일정 (매일, 매주, 매달)
 - 알림 및 이메일 푸시 알림
 - 협업 기능 (할일 공유, 댓글)
 - 할일 검색 및 필터링
-- 다크 모드
 - 사용자 프로필 수정
 - 계정 비활성화/탈퇴
 - 쿠키/세션 기반 인증 대체 (현재는 JWT만)
+- 레거시 코드 완전 제거 (AuthController, AuthService, DAO → Use Case로 마이그레이션)
 
 ---
 
@@ -836,99 +845,233 @@ isOverdue = (dueDate < today) && (done === false)
 
 | 계층 | 기술 | 버전 | 용도 |
 |------|------|------|------|
-| **프론트엔드** | React | 19 | UI 라이브러리 |
-| | TypeScript | 5.x | 정적 타입 시스템 |
-| | Axios 또는 Fetch API | - | HTTP 클라이언트 |
+| **프론트엔드** | React | 19.2.0 | UI 라이브러리 |
+| | TypeScript | 5.9.3 | 정적 타입 시스템 |
+| | Vite | 7.3.1 | 빌드 도구 및 개발 서버 |
+| | React Router DOM | 7.13.0 | 클라이언트 사이드 라우팅 |
+| | Axios | 1.13.5 | HTTP 클라이언트 |
+| | Vitest | 4.0.18 | 테스트 프레임워크 |
+| | React Testing Library | 16.3.2 | React 컴포넌트 테스트 |
 | **백엔드** | Node.js | >= 22.0.0 | 런타임 |
-| | Express.js | 4.x | 웹 프레임워크 |
+| | Express.js | 4.18.2 | 웹 프레임워크 |
+| | TypeScript | 5.9.3 | 정적 타입 시스템 (일부) |
 | | PostgreSQL | 17 | 관계형 데이터베이스 |
-| | pg | - | PostgreSQL 드라이버 |
-| | bcryptjs | - | 비밀번호 해시 |
-| | jsonwebtoken | - | JWT 토큰 생성/검증 |
-| | dotenv | - | 환경변수 관리 |
-| **배포** | Vercel | - | 프론트엔드 배포 예정 (PRD 범위 외) |
+| | pg | 8.11.3 | PostgreSQL 드라이버 |
+| | bcryptjs | 2.4.3 | 비밀번호 해시 |
+| | jsonwebtoken | 9.0.2 | JWT 토큰 생성/검증 |
+| | dotenv | 16.3.1 | 환경변수 관리 |
+| | swagger-ui-express | 5.0.1 | API 문서화 |
+| | Jest | 29.7.0 | 테스트 프레임워크 |
+| **아키텍처** | Clean Architecture | - | 계층 분리 및 의존성 역전 |
+| | DDD 패턴 | - | 도메인 주도 설계 |
+| | Use Case 패턴 | - | 애플리케이션 로직 분리 |
+| | Repository 패턴 | - | 데이터 접근 추상화 |
+| | DI Container | - | 의존성 주입 관리 |
+| **배포** | 미정 | - | 프론트엔드/백엔드 배포 예정 |
 
 ### 7.2 아키텍처
 
-#### 7.2.1 3계층 아키텍처
+#### 7.2.1 Clean Architecture (계층형 아키텍처)
 ```
-┌─────────────────────────────┐
-│     프론트엔드 (React)        │ (별도 저장소 또는 /frontend)
-├─────────────────────────────┤
-│ REST API (JSON)              │
-├─────────────────────────────┤
-│  백엔드 (Express.js)         │
-│ ┌────────────┬──────────────┤
-│ │ Routes    │ Middleware    │
-│ ├────────────┴──────────────┤
-│ │    Business Logic          │
-│ ├───────────────────────────┤
-│ │    Database Access Layer   │
-│ └───────────────────────────┘
-├─────────────────────────────┤
-│  PostgreSQL                  │
-└─────────────────────────────┘
+┌─────────────────────────────────────────────────────┐
+│         프론트엔드 (React 19 + TypeScript)            │
+│  Context API (Auth, Todo, Theme, Language)          │
+│  React Router DOM / Vite                            │
+├─────────────────────────────────────────────────────┤
+│              REST API (JSON over HTTP)              │
+├─────────────────────────────────────────────────────┤
+│           백엔드 (Express.js + TypeScript/JS)        │
+│ ┌─────────────────────────────────────────────────┐ │
+│ │  Presentation Layer (프레젠테이션 계층)           │ │
+│ │  - Controllers (TodoController, AuthController) │ │
+│ │  - Routes (todoRoutes, authRoutes)              │ │
+│ │  - Middleware (authMiddleware, errorHandler)    │ │
+│ ├─────────────────────────────────────────────────┤ │
+│ │  Application Layer (애플리케이션 계층)            │ │
+│ │  - Use Cases (CreateTodo, GetTodo, Update...)   │ │
+│ │  - DTOs (CreateTodoDTO, TodoResponseDTO)        │ │
+│ │  - Mappers (TodoMapper)                         │ │
+│ ├─────────────────────────────────────────────────┤ │
+│ │  Domain Layer (도메인 계층)                       │ │
+│ │  - Entities (Todo)                              │ │
+│ │  - Value Objects (TodoTitle, DueDate)           │ │
+│ │  - Repository Interfaces (ITodoRepository)      │ │
+│ │  - Domain Exceptions (DomainException...)       │ │
+│ ├─────────────────────────────────────────────────┤ │
+│ │  Infrastructure Layer (인프라스트럭처 계층)       │ │
+│ │  - Repositories (TodoRepositoryPostgres)        │ │
+│ │  - Security (PasswordHasher, JwtTokenProvider)  │ │
+│ │  - Database (PostgreSQL Connection Pool)        │ │
+│ │  - DI Container (의존성 주입 관리)                │ │
+│ └─────────────────────────────────────────────────┘ │
+├─────────────────────────────────────────────────────┤
+│           PostgreSQL 17 Database                    │
+│  - users 테이블 (UUID, bcrypt)                      │
+│  - todos 테이블 (UUID, Foreign Key Cascade)         │
+│  - Indexes (user_id, due_date, done)               │
+│  - Triggers (updated_at 자동 갱신)                   │
+└─────────────────────────────────────────────────────┘
 ```
 
-#### 7.2.2 백엔드 폴더 구조 (권장)
+**의존성 방향**: Presentation → Application → Domain ← Infrastructure
+**핵심 원칙**:
+- 도메인 계층은 외부 의존성 없음 (순수 비즈니스 로직)
+- 인프라스트럭처는 도메인 인터페이스 구현
+- Use Case를 통한 애플리케이션 로직 캡슐화
+- DI Container를 통한 의존성 주입
+
+#### 7.2.2 백엔드 폴더 구조 (Clean Architecture)
 ```
 backend/
 ├── src/
-│   ├── index.js              # Express 앱 설정 (CORS, 미들웨어, 포트)
-│   ├── routes/
-│   │   ├── auth.js           # 인증 라우트 (회원가입, 로그인)
-│   │   └── todos.js          # 할일 라우트 (CRUD)
+│   ├── index.js                           # Express 앱 진입점
+│   ├── routes.js                          # 라우트 통합
+│   │
+│   ├── presentation/                      # 프레젠테이션 계층
+│   │   ├── controllers/
+│   │   │   └── TodoController.ts          # Todo 컨트롤러 (Use Case 호출)
+│   │   ├── routes/
+│   │   │   ├── index.ts                   # 라우트 통합
+│   │   │   └── todoRoutes.ts              # Todo 라우트
+│   │   └── middleware/
+│   │       └── errorHandler.ts            # 에러 처리
+│   │
+│   ├── application/                       # 애플리케이션 계층
+│   │   ├── use-cases/
+│   │   │   ├── CreateTodoUseCase.ts       # 할일 생성 Use Case
+│   │   │   ├── GetUserTodosUseCase.ts     # 사용자 할일 목록 조회
+│   │   │   ├── GetTodoUseCase.ts          # 단일 할일 조회
+│   │   │   ├── UpdateTodoUseCase.ts       # 할일 수정
+│   │   │   └── DeleteTodoUseCase.ts       # 할일 삭제
+│   │   ├── dtos/
+│   │   │   ├── CreateTodoDTO.ts           # 할일 생성 DTO
+│   │   │   ├── UpdateTodoDTO.ts           # 할일 수정 DTO
+│   │   │   └── TodoResponseDTO.ts         # 할일 응답 DTO
+│   │   └── mappers/
+│   │       └── TodoMapper.ts              # Entity ↔ DTO 변환
+│   │
+│   ├── domain/                            # 도메인 계층
+│   │   ├── entities/
+│   │   │   └── Todo.ts                    # Todo 엔티티
+│   │   ├── value-objects/
+│   │   │   ├── TodoTitle.ts               # 제목 Value Object
+│   │   │   └── DueDate.ts                 # 마감일 Value Object
+│   │   ├── repositories/
+│   │   │   └── ITodoRepository.ts         # Repository 인터페이스
+│   │   └── exceptions/
+│   │       ├── DomainException.ts         # 도메인 예외 베이스
+│   │       ├── TodoNotFoundError.ts       # 할일 미발견 예외
+│   │       ├── InvalidTitleError.ts       # 제목 검증 예외
+│   │       ├── InvalidDueDateError.ts     # 마감일 검증 예외
+│   │       └── UnauthorizedAccessError.ts # 권한 예외
+│   │
+│   ├── infrastructure/                    # 인프라스트럭처 계층
+│   │   ├── persistence/
+│   │   │   └── TodoRepositoryPostgres.ts  # PostgreSQL Repository 구현
+│   │   ├── security/
+│   │   │   ├── PasswordHasher.ts          # 비밀번호 해싱 (bcrypt)
+│   │   │   └── JwtTokenProvider.ts        # JWT 토큰 관리
+│   │   └── di/
+│   │       └── Container.ts               # DI Container (Singleton)
+│   │
+│   ├── controllers/                       # 레거시 JS 컨트롤러
+│   │   ├── AuthController.js              # 인증 컨트롤러
+│   │   └── index.js
+│   ├── services/                          # 레거시 서비스 (향후 제거 예정)
+│   │   ├── AuthService.js
+│   │   └── index.js
+│   ├── dao/                               # 레거시 DAO (향후 제거 예정)
+│   │   ├── UserDAO.js
+│   │   └── index.js
 │   ├── middleware/
-│   │   ├── auth.js           # JWT 검증 미들웨어
-│   │   ├── errorHandler.js   # 에러 처리 미들웨어
-│   │   └── validator.js      # 입력값 검증 미들웨어
-│   ├── controllers/
-│   │   ├── authController.js # 인증 로직
-│   │   └── todosController.js# 할일 로직
-│   ├── models/
-│   │   ├── User.js           # User 테이블 매핑
-│   │   └── Todo.js           # Todo 테이블 매핑
+│   │   ├── authMiddleware.js              # JWT 검증 미들웨어
+│   │   ├── validatorMiddleware.js         # 입력값 검증
+│   │   ├── errorHandler.js                # 에러 처리
+│   │   └── index.js
 │   ├── config/
-│   │   └── database.js       # PostgreSQL 연결 설정
-│   └── utils/
-│       ├── token.js          # JWT 유틸
-│       └── hash.js           # bcrypt 유틸
-├── .env                      # 환경변수 (DATABASE_URL, JWT_SECRET 등)
-├── .env.example
-└── package.json
+│   │   └── database.js                    # PostgreSQL Pool 설정
+│   │
+│   └── __tests__/                         # 테스트 파일 (각 계층별로 분산)
+│
+├── database/
+│   └── schema.sql                         # 데이터베이스 스키마
+├── swagger/
+│   └── swagger.json                       # API 문서
+├── .env                                   # 환경변수
+├── package.json
+├── tsconfig.json                          # TypeScript 설정
+├── jest.config.js                         # Jest 설정
+└── .babelrc                               # Babel 설정
 ```
 
-#### 7.2.3 프론트엔드 폴더 구조 (권장)
+**아키텍처 특징**:
+- TypeScript(Clean Architecture 부분)와 JavaScript(레거시 Auth 부분) 혼합
+- 레거시 코드는 점진적으로 마이그레이션 예정
+- 각 계층은 명확한 책임과 의존성 방향 준수
+- 도메인 계층은 외부 의존성 없음 (순수 TypeScript)
+
+#### 7.2.3 프론트엔드 폴더 구조 (React 19 + TypeScript + Vite)
 ```
 frontend/
 ├── src/
-│   ├── index.tsx
-│   ├── App.tsx               # 라우팅 및 전역 레이아웃
-│   ├── pages/
-│   │   ├── LoginPage.tsx
-│   │   ├── RegisterPage.tsx
-│   │   ├── TodoListPage.tsx
-│   │   └── NotFoundPage.tsx
-│   ├── components/
-│   │   ├── TodoItem.tsx      # 할일 항목 컴포넌트
-│   │   ├── TodoForm.tsx      # 할일 입력 폼
-│   │   ├── ConfirmDialog.tsx # 삭제 확인 대화상자
-│   │   └── Header.tsx        # 헤더 (로그아웃 버튼)
-│   ├── hooks/
-│   │   ├── useAuth.ts        # 인증 상태 관리
-│   │   └── useTodos.ts       # 할일 데이터 관리
-│   ├── services/
-│   │   ├── api.ts            # API 클라이언트 (axios)
-│   │   ├── authService.ts    # 인증 서비스
-│   │   └── todoService.ts    # 할일 서비스
-│   ├── styles/
-│   │   ├── index.css
-│   │   └── todolist.module.css # CSS 모듈
-│   └── utils/
-│       └── dateFormat.ts     # 날짜 형식 유틸
-├── public/
-├── .env.example
+│   ├── main.tsx                          # 진입점
+│   ├── App.tsx                           # 라우팅 및 Provider 설정
+│   ├── App.css                           # 글로벌 스타일
+│   │
+│   ├── pages/                            # 페이지 컴포넌트
+│   │   ├── LoginPage.tsx                 # 로그인 페이지
+│   │   ├── RegisterPage.tsx              # 회원가입 페이지
+│   │   ├── TodoPage.tsx                  # 할일 관리 페이지
+│   │   └── NotFoundPage.tsx              # 404 페이지
+│   │
+│   ├── components/                       # 재사용 가능한 컴포넌트
+│   │   ├── Common/
+│   │   │   └── Header.tsx                # 헤더 (로그아웃, 테마 전환)
+│   │   └── Todo/
+│   │       ├── TodoItem.tsx              # 할일 항목
+│   │       ├── TodoList.tsx              # 할일 목록
+│   │       └── TodoForm.tsx              # 할일 입력 폼
+│   │
+│   ├── context/                          # Context API 상태 관리
+│   │   ├── AuthContext.tsx               # 인증 상태 (로그인/로그아웃)
+│   │   ├── TodoContext.tsx               # 할일 상태 (CRUD)
+│   │   ├── ThemeContext.tsx              # 테마 설정 (라이트/다크 모드)
+│   │   └── LanguageContext.tsx           # 언어 설정 (다국어 지원)
+│   │
+│   ├── services/                         # API 서비스 레이어
+│   │   ├── api.ts                        # Axios 인스턴스 (인터셉터)
+│   │   ├── authService.ts                # 인증 API
+│   │   └── todoService.ts                # 할일 API
+│   │
+│   ├── utils/                            # 유틸리티 함수
+│   │   ├── dateUtils.ts                  # 날짜 포맷팅
+│   │   └── validation.ts                 # 입력값 검증
+│   │
+│   ├── types/                            # TypeScript 타입 정의
+│   │   ├── auth.ts                       # 인증 관련 타입
+│   │   └── todo.ts                       # 할일 관련 타입
+│   │
+│   ├── index.css                         # 기본 스타일
+│   └── vite-env.d.ts                     # Vite 타입 정의
+│
+├── public/                               # 정적 파일
+│   └── vite.svg
+│
+├── index.html                            # HTML 템플릿
+├── vite.config.ts                        # Vite 설정
+├── tsconfig.json                         # TypeScript 설정
+├── tsconfig.node.json                    # Node용 TypeScript 설정
+├── eslint.config.js                      # ESLint 설정 (Flat Config)
+├── vitest.setup.ts                       # Vitest 설정
+├── .env.example                          # 환경변수 예시
 └── package.json
+
+**Context API 구조**:
+- AuthProvider: 사용자 인증 상태 관리
+  - UserPreferencesProviders 내부에서 사용
+    - LanguageProvider: 언어 설정 (다국어)
+    - ThemeProvider: 테마 설정 (라이트/다크 모드)
+- TodoProvider: 할일 CRUD 상태 관리
 ```
 
 ### 7.3 데이터베이스 스키마 (개요)
@@ -999,13 +1142,19 @@ CREATE INDEX idx_todos_user_id ON todos(user_id);
 
 ### 7.5 보안 요구사항
 
-- **비밀번호 보호**: bcryptjs를 사용한 해시 저장 (단방향 암호화)
-- **인증**: JWT 토큰 기반 (24시간 유효기간)
-- **CORS**: 프론트엔드 도메인만 허용하도록 설정
-- **SQL Injection 방지**: pg 라이브러리의 파라미터화된 쿼리 사용
+- **비밀번호 보호**: bcryptjs를 사용한 해시 저장 (단방향 암호화, Infrastructure Layer에서 처리)
+- **인증**: JWT 토큰 기반 (24시간 유효기간, JwtTokenProvider 구현)
+- **CORS**: 프론트엔드 도메인만 허용 (`process.env.FRONTEND_URL` 또는 기본값 `http://localhost:5173`)
+- **SQL Injection 방지**: pg 라이브러리의 파라미터화된 쿼리 사용 (Repository 계층)
 - **XSS 방지**: React의 자동 이스케이프 기능 활용
-- **HTTPS**: 프로덕션 환경에서 필수 (Vercel 자동 지원)
+- **도메인 검증**: Value Object를 통한 입력값 검증 (TodoTitle, DueDate)
+- **권한 검증**: Use Case 계층에서 비즈니스 로직 수준의 권한 체크
+- **HTTPS**: 프로덕션 환경에서 필수
 - **환경변수**: 민감한 정보(DB 연결, JWT_SECRET) .env 파일에서 관리
+  - `DATABASE_URL`: PostgreSQL 연결 문자열
+  - `JWT_SECRET`: JWT 토큰 서명 키
+  - `PORT`: 서버 포트 (기본값: 3000)
+  - `FRONTEND_URL`: CORS 허용 도메인
 
 ---
 
@@ -1322,3 +1471,4 @@ CREATE INDEX idx_todos_user_id ON todos(user_id);
 |------|------|----------|--------|
 | 1.0 | 2026-02-11 | 최초 작성 (도메인 정의서 기반 PRD 작성) | 제품 관리팀 |
 | 1.1 | 2026-02-11 | 인수기준(AC-001~009) 및 MVP 출시 검수기준 추가 | 제품 관리팀 |
+| 2.0 | 2026-02-13 | 실제 구현 기준 업데이트: Clean Architecture 적용, 기술 스택 업데이트 (React 19, Vite, Vitest, Jest), 백엔드/프론트엔드 폴더 구조 갱신, Context API 추가 (Theme, Language), 보안 요구사항 상세화, MVP 개발 완료 반영 | 제품 관리팀 |

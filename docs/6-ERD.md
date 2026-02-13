@@ -2,11 +2,11 @@
 
 ## 문서 정보
 
-**버전**: 1.0
+**버전**: 1.1
 **작성일**: 2026-02-11
-**최종 수정**: 2026-02-11
+**최종 수정**: 2026-02-13
 **작성자**: 문서 엔지니어
-**상태**: MVP 데이터베이스 설계 완료
+**상태**: 실제 데이터베이스 스키마 반영 완료
 
 ---
 
@@ -66,8 +66,8 @@ erDiagram
 | 속성명 | 데이터타입 | 제약조건 | 기본값 | 설명 |
 |--------|-----------|--------|--------|------|
 | id | UUID | PK, NOT NULL | gen_random_uuid() | 사용자 고유 식별자 |
-| username | VARCHAR(20) | UNIQUE, NOT NULL | - | 사용자명 (4~20자, 영문/숫자만) |
-| password | VARCHAR(255) | NOT NULL | - | 비밀번호 (bcrypt 해시, 해시 길이 60자) |
+| username | VARCHAR | UNIQUE, NOT NULL, CHECK | - | 사용자명 (4~20자, 영문/숫자만) |
+| password | VARCHAR | NOT NULL, CHECK | - | 비밀번호 (bcrypt 해시, 최소 8자) |
 | created_at | TIMESTAMP | NOT NULL | CURRENT_TIMESTAMP | 계정 생성 일시 |
 
 #### 3.1.2 데이터 검증 규칙
@@ -77,12 +77,14 @@ erDiagram
   - 문자: 영문(A-Z, a-z)과 숫자(0-9)만 허용
   - 유니크: 중복 불가 (409 Conflict)
   - 트림: 좌우 공백 제거 후 검증
+  - CHECK 제약: `CHECK ((char_length(username::text) >= 4) AND (char_length(username::text) <= 20))`
 
 - **password**
   - 길이: 최소 8자 이상
   - 저장: bcryptjs로 해시화 (단방향 암호화)
   - 비교: bcrypt.compare() 사용
   - 평문 저장 금지
+  - CHECK 제약: `CHECK (char_length(password::text) >= 8)`
 
 #### 3.1.3 주요 비즈니스 규칙
 
@@ -93,12 +95,20 @@ erDiagram
 #### 3.1.4 인덱스
 
 ```sql
--- 자동 생성 (UNIQUE 제약으로 인한 인덱스)
-CREATE UNIQUE INDEX idx_users_username ON users(username);
+-- 기본키 인덱스 (자동 생성)
+CREATE UNIQUE INDEX users_pkey ON users USING btree (id);
 
--- 성능 최적화
-CREATE INDEX idx_users_created_at ON users(created_at);
+-- UNIQUE 제약으로 자동 생성
+CREATE UNIQUE INDEX users_username_key ON users USING btree (username);
+
+-- 추가 유니크 인덱스 (성능 최적화)
+CREATE UNIQUE INDEX idx_users_username ON users USING btree (username);
+
+-- 생성일 기준 조회 최적화
+CREATE INDEX idx_users_created_at ON users USING btree (created_at);
 ```
+
+**참고**: `users_username_key`와 `idx_users_username`은 동일한 컬럼에 대한 중복 인덱스이나, UNIQUE 제약과 명시적 인덱스 생성으로 인해 존재합니다.
 
 #### 3.1.5 SQL 예시
 
@@ -106,10 +116,22 @@ CREATE INDEX idx_users_created_at ON users(created_at);
 -- 테이블 생성
 CREATE TABLE users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  username VARCHAR(20) UNIQUE NOT NULL,
-  password VARCHAR(255) NOT NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+  username VARCHAR UNIQUE NOT NULL,
+  password VARCHAR NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  -- CHECK 제약조건
+  CONSTRAINT users_username_length CHECK (
+    (char_length(username::text) >= 4) AND
+    (char_length(username::text) <= 20)
+  ),
+  CONSTRAINT users_password_not_empty CHECK (
+    char_length(password::text) >= 8
+  )
 );
+
+-- 인덱스 생성
+CREATE UNIQUE INDEX idx_users_username ON users USING btree (username);
+CREATE INDEX idx_users_created_at ON users USING btree (created_at);
 
 -- 샘플 데이터
 INSERT INTO users (username, password) VALUES
@@ -129,8 +151,8 @@ INSERT INTO users (username, password) VALUES
 |--------|-----------|--------|--------|------|
 | id | UUID | PK, NOT NULL | gen_random_uuid() | 할일 고유 식별자 |
 | user_id | UUID | FK, NOT NULL | - | 사용자 ID (users.id 참조) |
-| title | VARCHAR(100) | NOT NULL | - | 할일 제목 (1~100자) |
-| description | VARCHAR(1000) | NULL | - | 할일 설명 (최대 1000자, 선택사항) |
+| title | VARCHAR | NOT NULL, CHECK | - | 할일 제목 (TRIM 후 1~100자) |
+| description | VARCHAR | NULL, CHECK | - | 할일 설명 (최대 1000자, 선택사항) |
 | due_date | DATE | NOT NULL | - | 마감일 (YYYY-MM-DD 형식) |
 | done | BOOLEAN | NOT NULL | FALSE | 완료 여부 |
 | created_at | TIMESTAMP | NOT NULL | CURRENT_TIMESTAMP | 할일 생성 일시 |
@@ -139,14 +161,16 @@ INSERT INTO users (username, password) VALUES
 #### 3.2.2 데이터 검증 규칙
 
 - **title**
-  - 길이: 1자 이상 100자 이하
+  - 길이: TRIM 후 1자 이상, 원본 100자 이하
   - 필수: NOT NULL
   - 공백만 있는 경우 거부 (trim 후 검증)
+  - CHECK 제약: `CHECK ((char_length(TRIM(BOTH FROM title)) >= 1) AND (char_length(title::text) <= 100))`
 
 - **description**
   - 길이: 최대 1000자
   - 선택사항: NULL 허용
   - 공백: 빈 문자열 또는 NULL 모두 허용
+  - CHECK 제약: `CHECK ((description IS NULL) OR (char_length(description::text) <= 1000))`
 
 - **due_date**
   - 형식: YYYY-MM-DD (ISO 8601)
@@ -173,15 +197,20 @@ INSERT INTO users (username, password) VALUES
 #### 3.2.4 인덱스
 
 ```sql
--- 외래키 인덱스 (자동 생성)
-CREATE INDEX idx_todos_user_id ON todos(user_id);
+-- 기본키 인덱스 (자동 생성)
+CREATE UNIQUE INDEX todos_pkey ON todos USING btree (id);
 
--- 성능 최적화 (자주 쿼리하는 필드)
-CREATE INDEX idx_todos_due_date ON todos(due_date);
-CREATE INDEX idx_todos_done ON todos(done);
-CREATE INDEX idx_todos_user_id_due_date ON todos(user_id, due_date);
-CREATE INDEX idx_todos_user_id_done ON todos(user_id, done);
-CREATE INDEX idx_todos_created_at ON todos(created_at);
+-- 외래키 인덱스 (성능 최적화)
+CREATE INDEX idx_todos_user_id ON todos USING btree (user_id);
+
+-- 단일 컬럼 인덱스
+CREATE INDEX idx_todos_due_date ON todos USING btree (due_date);
+CREATE INDEX idx_todos_done ON todos USING btree (done);
+CREATE INDEX idx_todos_created_at ON todos USING btree (created_at);
+
+-- 복합 인덱스 (자주 함께 조회되는 컬럼)
+CREATE INDEX idx_todos_user_id_due_date ON todos USING btree (user_id, due_date);
+CREATE INDEX idx_todos_user_id_done ON todos USING btree (user_id, done);
 ```
 
 #### 3.2.5 SQL 예시
@@ -191,25 +220,37 @@ CREATE INDEX idx_todos_created_at ON todos(created_at);
 CREATE TABLE todos (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  title VARCHAR(100) NOT NULL,
-  description VARCHAR(1000),
+  title VARCHAR NOT NULL,
+  description VARCHAR,
   due_date DATE NOT NULL,
   done BOOLEAN NOT NULL DEFAULT FALSE,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  -- CHECK 제약조건
+  CONSTRAINT todos_title_not_empty CHECK (
+    (char_length(TRIM(BOTH FROM title)) >= 1) AND
+    (char_length(title::text) <= 100)
+  ),
+  CONSTRAINT todos_description_length CHECK (
+    (description IS NULL) OR
+    (char_length(description::text) <= 1000)
+  )
 );
 
 -- 인덱스 생성
-CREATE INDEX idx_todos_user_id ON todos(user_id);
-CREATE INDEX idx_todos_due_date ON todos(due_date);
-CREATE INDEX idx_todos_user_id_due_date ON todos(user_id, due_date);
+CREATE INDEX idx_todos_user_id ON todos USING btree (user_id);
+CREATE INDEX idx_todos_due_date ON todos USING btree (due_date);
+CREATE INDEX idx_todos_done ON todos USING btree (done);
+CREATE INDEX idx_todos_user_id_due_date ON todos USING btree (user_id, due_date);
+CREATE INDEX idx_todos_user_id_done ON todos USING btree (user_id, done);
+CREATE INDEX idx_todos_created_at ON todos USING btree (created_at);
 
 -- 샘플 데이터
 INSERT INTO todos (user_id, title, description, due_date, done) VALUES
 ('f47ac10b-58cc-4372-a567-0e02b2c3d479', '보고서 작성', '분기 실적', '2026-02-15', false),
 ('f47ac10b-58cc-4372-a567-0e02b2c3d479', '회의 준비', '', '2026-02-12', false);
 
--- 자동 갱신: updatedAt은 UPDATE 시 트리거로 처리
+-- 자동 갱신: updated_at은 UPDATE 시 트리거로 처리
 CREATE OR REPLACE FUNCTION update_todos_timestamp()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -463,13 +504,22 @@ ORDER BY due_date;
 | users | id | PK이므로 자동으로 유니크 |
 | todos | id | PK이므로 자동으로 유니크 |
 
-### 7.3 FOREIGN KEY 제약
+### 7.3 CHECK 제약
+
+| 테이블 | 제약명 | 검증 내용 | 정의 |
+|--------|--------|----------|------|
+| users | users_username_length | username 길이 4~20자 | `CHECK ((char_length(username::text) >= 4) AND (char_length(username::text) <= 20))` |
+| users | users_password_not_empty | password 최소 8자 | `CHECK (char_length(password::text) >= 8)` |
+| todos | todos_title_not_empty | title TRIM 후 1자 이상, 원본 100자 이하 | `CHECK ((char_length(TRIM(BOTH FROM title)) >= 1) AND (char_length(title::text) <= 100))` |
+| todos | todos_description_length | description NULL 또는 1000자 이하 | `CHECK ((description IS NULL) OR (char_length(description::text) <= 1000))` |
+
+### 7.4 FOREIGN KEY 제약
 
 | 참조 테이블 | 참조 필드 | 피참조 테이블 | 피참조 필드 | 삭제 정책 |
 |-----------|---------|-----------|---------|---------|
 | todos | user_id | users | id | ON DELETE CASCADE |
 
-### 7.4 DEFAULT 값
+### 7.5 DEFAULT 값
 
 | 테이블 | 필드 | 기본값 | 설명 |
 |--------|------|--------|------|
@@ -494,30 +544,52 @@ DROP TABLE IF EXISTS users CASCADE;
 -- 2. users 테이블 생성
 CREATE TABLE users (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  username VARCHAR(20) UNIQUE NOT NULL,
-  password VARCHAR(255) NOT NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+  username VARCHAR UNIQUE NOT NULL,
+  password VARCHAR NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  -- CHECK 제약조건
+  CONSTRAINT users_username_length CHECK (
+    (char_length(username::text) >= 4) AND
+    (char_length(username::text) <= 20)
+  ),
+  CONSTRAINT users_password_not_empty CHECK (
+    char_length(password::text) >= 8
+  )
 );
 
 -- 3. todos 테이블 생성
 CREATE TABLE todos (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  title VARCHAR(100) NOT NULL,
-  description VARCHAR(1000),
+  title VARCHAR NOT NULL,
+  description VARCHAR,
   due_date DATE NOT NULL,
   done BOOLEAN NOT NULL DEFAULT FALSE,
   created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  -- CHECK 제약조건
+  CONSTRAINT todos_title_not_empty CHECK (
+    (char_length(TRIM(BOTH FROM title)) >= 1) AND
+    (char_length(title::text) <= 100)
+  ),
+  CONSTRAINT todos_description_length CHECK (
+    (description IS NULL) OR
+    (char_length(description::text) <= 1000)
+  )
 );
 
 -- 4. 인덱스 생성
-CREATE UNIQUE INDEX idx_users_username ON users(username);
-CREATE INDEX idx_todos_user_id ON todos(user_id);
-CREATE INDEX idx_todos_due_date ON todos(due_date);
-CREATE INDEX idx_todos_done ON todos(done);
-CREATE INDEX idx_todos_user_id_due_date ON todos(user_id, due_date);
-CREATE INDEX idx_todos_user_id_done ON todos(user_id, done);
+-- users 인덱스
+CREATE UNIQUE INDEX idx_users_username ON users USING btree (username);
+CREATE INDEX idx_users_created_at ON users USING btree (created_at);
+
+-- todos 인덱스
+CREATE INDEX idx_todos_user_id ON todos USING btree (user_id);
+CREATE INDEX idx_todos_due_date ON todos USING btree (due_date);
+CREATE INDEX idx_todos_done ON todos USING btree (done);
+CREATE INDEX idx_todos_user_id_due_date ON todos USING btree (user_id, due_date);
+CREATE INDEX idx_todos_user_id_done ON todos USING btree (user_id, done);
+CREATE INDEX idx_todos_created_at ON todos USING btree (created_at);
 
 -- 5. 트리거 생성 (updated_at 자동 갱신)
 CREATE OR REPLACE FUNCTION update_todos_timestamp()
@@ -539,7 +611,7 @@ INSERT INTO users (username, password) VALUES
 ('mrlee', '$2b$10$...(bcrypt hash)...');
 
 -- 7. 타임존 설정 (권장)
-ALTER DATABASE my_todolist SET timezone = 'UTC';
+ALTER DATABASE postgres SET timezone = 'UTC';
 ```
 
 ### 8.2 Node.js/Express에서 초기화
@@ -560,9 +632,16 @@ async function initializeDatabase() {
     await client.query(`
       CREATE TABLE IF NOT EXISTS users (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        username VARCHAR(20) UNIQUE NOT NULL,
-        password VARCHAR(255) NOT NULL,
-        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        username VARCHAR UNIQUE NOT NULL,
+        password VARCHAR NOT NULL,
+        created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        CONSTRAINT users_username_length CHECK (
+          (char_length(username::text) >= 4) AND
+          (char_length(username::text) <= 20)
+        ),
+        CONSTRAINT users_password_not_empty CHECK (
+          char_length(password::text) >= 8
+        )
       );
     `);
 
@@ -571,24 +650,47 @@ async function initializeDatabase() {
       CREATE TABLE IF NOT EXISTS todos (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
         user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        title VARCHAR(100) NOT NULL,
-        description VARCHAR(1000),
+        title VARCHAR NOT NULL,
+        description VARCHAR,
         due_date DATE NOT NULL,
         done BOOLEAN NOT NULL DEFAULT FALSE,
         created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        CONSTRAINT todos_title_not_empty CHECK (
+          (char_length(TRIM(BOTH FROM title)) >= 1) AND
+          (char_length(title::text) <= 100)
+        ),
+        CONSTRAINT todos_description_length CHECK (
+          (description IS NULL) OR
+          (char_length(description::text) <= 1000)
+        )
       );
     `);
 
     // 인덱스
     await client.query(`
-      CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username ON users(username);
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_users_username ON users USING btree (username);
     `);
     await client.query(`
-      CREATE INDEX IF NOT EXISTS idx_todos_user_id ON todos(user_id);
+      CREATE INDEX IF NOT EXISTS idx_users_created_at ON users USING btree (created_at);
     `);
     await client.query(`
-      CREATE INDEX IF NOT EXISTS idx_todos_user_id_due_date ON todos(user_id, due_date);
+      CREATE INDEX IF NOT EXISTS idx_todos_user_id ON todos USING btree (user_id);
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_todos_due_date ON todos USING btree (due_date);
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_todos_done ON todos USING btree (done);
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_todos_user_id_due_date ON todos USING btree (user_id, due_date);
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_todos_user_id_done ON todos USING btree (user_id, done);
+    `);
+    await client.query(`
+      CREATE INDEX IF NOT EXISTS idx_todos_created_at ON todos USING btree (created_at);
     `);
 
     console.log('Database initialized successfully');
@@ -862,8 +964,9 @@ WHERE done = FALSE AND due_date < CURRENT_DATE;
 | 버전 | 날짜 | 변경 내용 | 작성자 |
 |------|------|----------|--------|
 | 1.0 | 2026-02-11 | MVP ERD 최초 작성, USERS/TODOS 엔티티 정의, 관계 및 제약사항 포함 | 문서 엔지니어 |
+| 1.1 | 2026-02-13 | 실제 PostgreSQL 스키마 반영: CHECK 제약조건 추가 (username/password/title/description 검증), 인덱스 상세화 (btree 명시), 트리거 확인 (todos_update_timestamp), 데이터베이스 초기화 SQL 업데이트 | 문서 엔지니어 |
 
 ---
 
-**문서 완료 일시**: 2026-02-11 16:30 KST
-**다음 검토 예정**: 2026-02-12 (개발팀 피드백 반영)
+**문서 완료 일시**: 2026-02-13 (실제 DB 스키마 반영)
+**다음 검토 예정**: Phase 2 개발 시작 전 (확장 엔티티 설계)
