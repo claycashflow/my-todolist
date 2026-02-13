@@ -20,11 +20,23 @@ const swaggerDocument = JSON.parse(
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// CORS 설정 - 여러 출처 허용
+const allowedOrigins = process.env.FRONTEND_URL
+  ? process.env.FRONTEND_URL.split(',').map(url => url.trim())
+  : ['http://localhost:5173'];
+
 // 미들웨어
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  origin: (origin, callback) => {
+    // origin이 undefined인 경우는 같은 출처 요청 (Postman, curl 등)
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error(`Origin ${origin} not allowed by CORS`));
+    }
+  },
   credentials: process.env.CORS_CREDENTIALS === 'true'
 }));
 
