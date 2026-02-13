@@ -9,13 +9,11 @@
     "npm": ">=10.0.0"
   },
   "scripts": {
-    "dev": "npm run dev:compiled",
-    "dev:compiled": "npm run build && nodemon build/index.js",
-    "build": "tsc && npx tsc-alias && node fix-imports.js",
-    "build:ts": "tsc --noEmit",
-    "start": "node build/index.js",
-    "test": "jest",
-    "test:coverage": "jest --coverage"
+  "dev": "npm run build && nodemon build/index.js",
+  "build": "tsc && tsc-alias && node fix-imports.js",
+  "start": "node build/index.js",
+  "test": "jest",
+  "test:coverage": "jest --coverage"
   },
   "keywords": [
     "todo",
