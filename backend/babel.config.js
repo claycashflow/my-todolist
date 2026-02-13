@@ -3,7 +3,8 @@ export default {
     ['@babel/preset-env', {
       targets: {
         node: '22'
-      }
+      },
+      modules: 'auto'
     }],
     ['@babel/preset-typescript', {
       allowDeclareFields: true

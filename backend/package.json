@@ -10,10 +10,9 @@
   },
   "scripts": {
     "dev": "npm run dev:compiled",
-    "dev:compiled": "npm run build:ts && npx tsc-alias && node fix-imports.js && nodemon build/index.js",
-    "build": "tsc && npx tsc-alias && node fix-imports.js && babel src -d build",
-    "build:ts": "tsc",
-    "build:babel": "babel src -d build",
+    "dev:compiled": "npm run build && nodemon build/index.js",
+    "build": "tsc && npx tsc-alias && node fix-imports.js",
+    "build:ts": "tsc --noEmit",
     "start": "node build/index.js",
     "test": "jest",
     "test:coverage": "jest --coverage"
